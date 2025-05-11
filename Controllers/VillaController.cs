@@ -23,16 +23,67 @@ namespace HotelBooking.Web.Controllers
         [HttpPost]
         public IActionResult Create(Villa obj)
         {
+            if (obj.Name == obj.Description)
+            {
+                ModelState.AddModelError("name", "The Description can not exactly match the Name.");
+            }
             if (ModelState.IsValid)
             {
                 _db.Villas.Add(obj);
                 _db.SaveChanges();
+                TempData["success"] = "The Villa has been Created Successfully!";
                 return RedirectToAction("Index");
             }
             else
             {
+                TempData["error"] = "The Villa could not be created!";
                 return View();
             }
+        }
+        public IActionResult Update(int villaId)
+        {
+            Villa? obj = _db.Villas.FirstOrDefault(u => u.Id == villaId);
+            if (obj == null)
+            {
+                return RedirectToAction("Error", "Home");
+            }
+            return View(obj);
+        }
+        [HttpPost]
+        public IActionResult Update(Villa obj)
+        {
+           if (ModelState.IsValid && obj.Id>0)
+            {
+                _db.Villas.Update(obj);
+                _db.SaveChanges();
+                TempData["success"] = "The Villa has been Updated Successfully!";
+                return RedirectToAction("Index");
+           }
+            TempData["error"] = "The Villa Could not updated!";
+            return View();
+        }
+        public IActionResult Delete(int villaId)
+        {
+            Villa? obj = _db.Villas.FirstOrDefault(u => u.Id == villaId);
+            if (obj is null)
+            {
+                return RedirectToAction("Error", "Home");
+            }
+            return View(obj);
+        }
+        [HttpPost]
+        public IActionResult Delete(Villa obj)
+        {
+            Villa? objFromDb = _db.Villas.FirstOrDefault(u => u.Id == obj.Id);
+            if (objFromDb is not null)
+            {
+                _db.Villas.Remove(objFromDb);
+                _db.SaveChanges();
+                TempData["success"] = "The Villa has been Deleted Successfully!";
+                return RedirectToAction("Index");
+            }
+            TempData["error"] = "The Villa could not be Deleted!";
+            return View();
         }
     }
 }
