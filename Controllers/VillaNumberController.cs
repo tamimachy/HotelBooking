@@ -1,6 +1,7 @@
 ﻿using HotelBooking.Domain.Entities;
 using HotelBooking.Infrastructure.Data;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace HotelBooking.Web.Controllers
 {
@@ -18,20 +19,23 @@ namespace HotelBooking.Web.Controllers
         }
         public IActionResult Create()
         {
+            IEnumerable<SelectListItem> list = _db.Villas.ToList().Select(u => new SelectListItem
+            {
+                Text = u.Name,
+                Value = u.Id.ToString()
+            });
+            ViewBag.VillaList = list;
             return View();
         }
         [HttpPost]
-        public IActionResult Create(Villa obj)
+        public IActionResult Create(VillaNumber obj)
         {
-            if (obj.Name == obj.Description)
-            {
-                ModelState.AddModelError("name", "The Description can not exactly match the Name.");
-            }
+            ModelState.Remove("Villa");
             if (ModelState.IsValid)
             {
-                _db.Villas.Add(obj);
+                _db.VillaNumbers.Add(obj);
                 _db.SaveChanges();
-                TempData["success"] = "The Villa has been Created Successfully!";
+                TempData["success"] = "The Villa Number has been Created Successfully!";
                 return RedirectToAction("Index");
             }
             else
