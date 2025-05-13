@@ -1,4 +1,5 @@
-﻿using HotelBooking.Domain.Entities;
+﻿using HotelBooking.Application.Common.Interfaces;
+using HotelBooking.Domain.Entities;
 using HotelBooking.Infrastructure.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -7,10 +8,10 @@ namespace HotelBooking.Web.Controllers
 {
     public class VillaController : Controller
     {
-        private readonly ApplicationDbContext _db;
-        public VillaController(ApplicationDbContext db)
+        private readonly IVillaRepository _villaRepo;
+        public VillaController(IVillaRepository villaRepo)
         {
-            _db = db;
+            _villaRepo = villaRepo;
         }
         public IActionResult Index()
         {
@@ -33,7 +34,7 @@ namespace HotelBooking.Web.Controllers
                 _db.Villas.Add(obj);
                 _db.SaveChanges();
                 TempData["success"] = "The Villa has been Created Successfully!";
-                return RedirectToAction("Index");
+                return RedirectToAction(nameof(Index));
             }
             else
             {
@@ -58,7 +59,7 @@ namespace HotelBooking.Web.Controllers
                 _db.Villas.Update(obj);
                 _db.SaveChanges();
                 TempData["success"] = "The Villa has been Updated Successfully!";
-                return RedirectToAction("Index");
+                return RedirectToAction(nameof(Index));
            }
             TempData["error"] = "The Villa Could not updated!";
             return View();
@@ -81,7 +82,7 @@ namespace HotelBooking.Web.Controllers
                 _db.Villas.Remove(objFromDb);
                 _db.SaveChanges();
                 TempData["success"] = "The Villa has been Deleted Successfully!";
-                return RedirectToAction("Index");
+                return RedirectToAction(nameof(Index));
             }
             TempData["error"] = "The Villa could not be Deleted!";
             return View();
