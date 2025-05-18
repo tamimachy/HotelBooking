@@ -2,11 +2,13 @@
 using HotelBooking.Domain.Entities;
 using HotelBooking.Infrastructure.Data;
 using HotelBooking.Infrastructure.Repository;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace HotelBooking.Web.Controllers
 {
+    [Authorize]
     public class VillaController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
