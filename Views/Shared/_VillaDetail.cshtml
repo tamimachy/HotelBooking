@@ -29,7 +29,7 @@
                 <p class="text-warning font-weight-bold pt-1">
                     USD
                     <span style=" #ff6a00">
-                        @Model.Price.ToString("c") / night
+                        @("$" + Model.Price.ToString("N2")) / night
                     </span>
                 </p>
             </span>

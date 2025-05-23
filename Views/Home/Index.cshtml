@@ -23,7 +23,7 @@
             <span class="visually-hidden">Next</span>
         </button>
     </div>
-    <form method="post" asp-action="GetVillasByDate" data-ajax-method="post" data-ajax="true" data-ajax-mode="replace" data-ajax-update="#VillaList">
+    <form method="post" asp-action="GetVillasByDate">
         <div class="row p-0 mx-0 py-4">
 
             <div class="col-12 col-md-5  offset-md-1 pl-2  pr-2 pr-md-0">
@@ -47,7 +47,7 @@
 
             <div class="col-4 col-md-2 pt-4 pr-2">
                 <div class="form-group">
-                    <button type="submit" class="btn btn-success btn-block">
+                    <button type="button" onclick="fnLoadVillaList()" class="btn btn-success btn-block">
                         <i class="bi bi-search"></i>  &nbsp; Check Availability
                     </button>
 
@@ -59,3 +59,41 @@
 
     </form>
 </div>
+
+@section scripts{
+    <script>
+        function fnLoadVillaList(){
+        
+            $('.spinner').show();
+            var objData={
+                checkInDate: $("#CheckInDate").val(),
+                nights: $("#Nights").val()
+            };
+
+            var checkInDate = $("#CheckInDate").val();
+            var noOfNights = $("#NoOfNights").val();
+            var url = "/Home/GetVillasByDate?checkInDate="+checkInDate+"&noOfNights="+noOfNights;
+        
+            $.ajax({
+                url: "@Url.Action("GetVillasByDate","Home")",
+                data: objData,
+                type: "POST",
+                success: function(data){
+                    $("#VillasList").empty();
+                    $("#VillasList").html(data);
+                    $('.spinner').hide();
+                },
+                failure: function(response){
+                    $('.spinner').hide();
+                    alert(response.responseText);
+                },
+                error: function(response){
+                    $('.spinner').hide();
+                    alert(response.responseText);
+                }
+
+            });
+    }
+
+    </script>
+}
