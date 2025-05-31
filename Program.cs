@@ -4,6 +4,7 @@ using HotelBooking.Infrastructure.Data;
 using HotelBooking.Infrastructure.Repository;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Stripe;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,6 +27,8 @@ builder.Services.ConfigureApplicationCookie(option =>
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 var app = builder.Build();
+
+StripeConfiguration.ApiKey=builder.Configuration.GetSection("Stripe:SecretKey").Get<string>();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
