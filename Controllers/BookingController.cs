@@ -80,6 +80,7 @@ namespace HotelBooking.Web.Controllers
             _unitOfWork.Booking.UpdateStripePaymentId(booking.Id, session.Id, session.PaymentIntentId);
             _unitOfWork.Save();
 
+
             Response.Headers.Add("Location", session.Url);
             return new StatusCodeResult(303);
         }
