@@ -163,7 +163,7 @@ namespace HotelBooking.Web.Controllers
 
         #region API Calls
         [HttpGet]
-        //[Authorize]
+        [Authorize]
         public IActionResult GetAll()
         {
             IEnumerable<Booking> objBookings;
@@ -178,7 +178,6 @@ namespace HotelBooking.Web.Controllers
 
                 objBookings = _unitOfWork.Booking.GetAll(u => u.UserId == userId, includeProperties: "User,Villa");
             }
-            objBookings = _unitOfWork.Booking.GetAll(includeProperties: "User,Villa");
             return Json(new {data=objBookings});
 
         }
