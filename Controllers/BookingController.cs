@@ -3,8 +3,10 @@ using HotelBooking.Application.Common.Utility;
 using HotelBooking.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using Stripe;
 using Stripe.Checkout;
+using System.Buffers;
 using System.Security.Claims;
 
 namespace HotelBooking.Web.Controllers
@@ -164,7 +166,7 @@ namespace HotelBooking.Web.Controllers
         #region API Calls
         [HttpGet]
         [Authorize]
-        public IActionResult GetAll()
+        public IActionResult GetAll(string status)
         {
             IEnumerable<Booking> objBookings;
             if (User.IsInRole(SD.Role_Admin))
@@ -178,8 +180,11 @@ namespace HotelBooking.Web.Controllers
 
                 objBookings = _unitOfWork.Booking.GetAll(u => u.UserId == userId, includeProperties: "User,Villa");
             }
+            if (!string.IsNullOrEmpty(status))
+            {
+                objBookings = objBookings.Where(u => u.Status.ToLower().Equals(status.ToLower()));
+            }
             return Json(new {data=objBookings});
-
         }
         #endregion
     }
