@@ -27,17 +27,28 @@
                         <li class="nav-item">
                             <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false"> Content Management
-                            </a>
-                            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                <a class="dropdown-item" asp-controller="Villa" asp-action="Index">Villa</a>
-                                <a class="dropdown-item" asp-controller="VillaNumber" asp-action="Index">VillaNumber</a>
-                                <hr class="dropdown-divider" />
-                                <a class="dropdown-item" asp-controller="Amenity" asp-action="Index">Amenity</a>
-                                <a class="dropdown-item" asp-controller="Booking" asp-action="Index" asp-route-status="@SD.StatusApproved">Booking</a>
-                            </div>
-                        </li>
+                        @if (User.IsInRole(SD.Role_Admin))
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Content Management
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                    <a class="dropdown-item" asp-controller="Villa" asp-action="Index">Villa</a>
+                                    <a class="dropdown-item" asp-controller="VillaNumber" asp-action="Index">VillaNumber</a>
+                                    <hr class="dropdown-divider" />
+                                    <a class="dropdown-item" asp-controller="Amenity" asp-action="Index">Amenity</a>
+                                    <a class="dropdown-item" asp-controller="Booking" asp-action="Index" asp-route-status="@SD.StatusApproved">Booking</a>
+                                </div>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Booking" asp-action="Index">Manage Bookings</a>
+                            </li>
+                        }
+
                     </ul>
                     <partial name="_LoginPartial"/>
                 </div>
