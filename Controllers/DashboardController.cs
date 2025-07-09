@@ -87,24 +87,51 @@ namespace HotelBooking.Web.Controllers
                 NewCustomerCount = u.Count()
             });
 
-            var leftJoin = bookingData.GroupJoin(customerData, booking => booking.DateTime, customer => customer.DateTime, (booking, customer) => new
+            var leftJoin = bookingData.GroupJoin(customerData, booking => booking.DateTime, customer => customer.DateTime, 
+                (booking, customer) => new
             {
                 booking.DateTime,
                 booking.NewBookingCount,
                 NewCustomerCount = customer.Select(x=>x.NewCustomerCount).FirstOrDefault()
             });
 
-            var rightJoin = customerData.GroupJoin(bookingData, customer => customer.DateTime, booking => booking.DateTime, (customer, booking) => new
+            var rightJoin = customerData.GroupJoin(bookingData, customer => customer.DateTime, booking => booking.DateTime, 
+                (customer, booking) => new
             {
                 customer.DateTime,
+                NewBookingCount = booking.Select(x => x.NewBookingCount).FirstOrDefault(),
                 customer.NewCustomerCount,
-                NewBookingCount = booking.Select(x => x.NewBookingCount).FirstOrDefault()
-            });
+                });
 
-            //var margedData = leftJoin.Union(rightJoin).OrderBy(x => x.DateTime).ToList();
-            //var newBookin
+            var margedData = leftJoin.Union(rightJoin)
+                                     .OrderBy(x => x.DateTime)
+                                     .ToList();
+            var newBookingData = margedData.Select(x => x.NewBookingCount).ToArray();
+            var newCustomerData = margedData.Select(x => x.NewCustomerCount).ToArray();
+            var categories = margedData.Select(x => x.DateTime.ToString("MM/dd/yyyy")).ToArray();
 
-            return Json(bookingData);
+            List<ChartData> chartDataList = new()
+            {
+                new ChartData
+                {
+                    Name = "New Bookings",
+                    Data = newBookingData
+                },
+                new ChartData
+                {
+                    Name = "New Members",
+                    Data = newCustomerData
+                }
+            };
+
+            LineChartVM lineChartVM = new()
+            {
+                Categories = categories,
+                Series = chartDataList
+            };
+           
+
+            return Json(lineChartVM);
         }
 
         private static RadialBarChartVM GetRadialChartDataModel(int totalCount, double currentMonthCount, double prevMonthCount)

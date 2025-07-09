@@ -25,6 +25,9 @@ function loadPieChart(id, data) {
             width: 380,
             type: 'pie'
         },
+        stroke: {
+            show: false
+        },
         legend: {
             position: 'bottom',
             horizontalAign: 'center',
