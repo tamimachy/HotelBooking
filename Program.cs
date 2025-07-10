@@ -5,6 +5,7 @@ using HotelBooking.Infrastructure.Repository;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Stripe;
+using Syncfusion.Licensing;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,6 +30,8 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 var app = builder.Build();
 
 StripeConfiguration.ApiKey=builder.Configuration.GetSection("Stripe:SecretKey").Get<string>();
+
+SyncfusionLicenseProvider.RegisterLicense(builder.Configuration.GetSection("Syncfusion.Licensekey").Get<string>());
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

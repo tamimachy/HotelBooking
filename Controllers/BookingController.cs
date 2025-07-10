@@ -6,17 +6,25 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using Stripe;
 using Stripe.Checkout;
+using Syncfusion.DocIO;
+using Syncfusion.DocIO.DLS;
+using Syncfusion.DocIORenderer;
+using Syncfusion.Drawing;
 using System.Buffers;
+using System.Drawing;
 using System.Security.Claims;
+using Color = Syncfusion.Drawing.Color;
 
 namespace HotelBooking.Web.Controllers
 {
     public class BookingController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
-        public BookingController(IUnitOfWork unitOfWork)
+        private readonly IWebHostEnvironment _webHostEnvironment;
+        public BookingController(IUnitOfWork unitOfWork, IWebHostEnvironment webHostEnvironment)
         {
             _unitOfWork = unitOfWork;
+            _webHostEnvironment = webHostEnvironment;
         }
         [Authorize]
         public IActionResult Index()
@@ -178,6 +186,83 @@ namespace HotelBooking.Web.Controllers
             }
             return View(bookingFromDb);
         }
+
+        [HttpPost]
+        [Authorize]
+        public IActionResult GenerateInvoice(int id)
+        {
+            string basePath = _webHostEnvironment.WebRootPath;
+            WordDocument document = new WordDocument();
+            // Load the template
+            string dataPath = basePath + @"/exports/BookingDetails.docx";
+            using FileStream fileStream = new(dataPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+            document.Open(fileStream, FormatType.Automatic);
+            // Update Template
+            Booking bookingFromDb = _unitOfWork.Booking.Get(u => u.Id == id, includeProperties: "User,Villa");
+
+            TextSelection textSelection = document.Find("xx_customer_name", false, true);
+            WTextRange textRange = textSelection.GetAsOneRange();
+            textRange.Text = bookingFromDb.Name;
+
+            textSelection = document.Find("xx_customer_phone", false, true);
+            textRange = textSelection.GetAsOneRange();
+            textRange.Text = bookingFromDb.Phone;
+
+            textSelection = document.Find("xx_customer_email", false, true);
+            textRange = textSelection.GetAsOneRange();
+            textRange.Text = bookingFromDb.Email;
+
+            textSelection = document.Find("XX_BOOKING_NUMBER", false, true);
+            textRange = textSelection.GetAsOneRange();
+            textRange.Text = "BOOKING ID - " + bookingFromDb.Id;
+
+            textSelection = document.Find("XX_BOOKING_DATE", false, true);
+            textRange = textSelection.GetAsOneRange();
+            textRange.Text = "BOOKING DATE - " + bookingFromDb.BookingDate.ToShortDateString();
+
+            textSelection = document.Find("xx_payment_date", false, true);
+            textRange = textSelection.GetAsOneRange();
+            textRange.Text = bookingFromDb.PaymentDate.ToShortDateString();
+
+            textSelection = document.Find("xx_checkin_date", false, true);
+            textRange = textSelection.GetAsOneRange();
+            textRange.Text = bookingFromDb.CheckInDate.ToShortDateString();
+
+            textSelection = document.Find("xx_checkout_date", false, true);
+            textRange = textSelection.GetAsOneRange();
+            textRange.Text = bookingFromDb.CheckOutDate.ToShortDateString();
+
+            textSelection = document.Find("xx_booking_total", false, true);
+            textRange = textSelection.GetAsOneRange();
+            textRange.Text = bookingFromDb.TotalCost.ToString("c");
+
+            WTable table = new(document);
+            
+            table.TableFormat.Borders.LineWidth = 1f;
+            table.TableFormat.Borders.Color = Color.Black;
+            table.TableFormat.Paddings.Top = 7f;
+            table.TableFormat.Paddings.Bottom = 7f;
+            table.TableFormat.Borders.Horizontal.LineWidth = 1f;
+
+            table.ResetCells(2, 4);
+
+            WTableRow row0 = table.Rows[0];
+
+            row0.Cells[0].AddParagraph().AppendText("NIGHTS");
+            row0.Cells[0].Width = 80;
+            row0.Cells[1].AddParagraph().AppendText("VILLA");
+            row0.Cells[1].Width = 220;
+            row0.Cells[2].AddParagraph().AppendText("NIGHTS");
+            row0.Cells[0].Width = 80;
+            row0.Cells[3].AddParagraph().AppendText("NIGHTS");
+
+            using DocIORenderer renderer = new();
+            MemoryStream stream = new();
+            document.Save(stream, FormatType.Docx);
+            stream.Position = 0;
+            return File(stream, "application/docx", "BookingDetails.docx");
+        }
+
         [HttpPost]
         [Authorize(Roles =SD.Role_Admin)]
         public IActionResult CheckIn(Booking booking)
